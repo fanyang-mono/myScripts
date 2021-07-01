@@ -18,12 +18,17 @@
 
 echo ">>>>>>>>>>> ${1}"
 
-MONO_GIT_ROOT="/home/yangfan/dotnet_latest/runtime"
-TE_PRJ_DIR="/home/yangfan/Benchmarks/src/BenchmarksApps/Kestrel/PlatformBenchmarks"
-FLAME_GRAPH_ROOT="/home/yangfan/FlameGraph"
-TRACE_DIR="/home/yangfan/trace"
+MONO_GIT_ROOT=/home/yangfan/dotnet_latest/runtime
+TE_PRJ_DIR=/home/yangfan/Benchmarks/src/BenchmarksApps/Kestrel/PlatformBenchmarks
+FLAME_GRAPH_ROOT=/home/yangfan/FlameGraph
+TRACE_DIR=/home/yangfan/trace
+LLVM_PATH=$MONO_GIT_ROOT/artifacts/bin/mono/Linux.x64.Release
+AOT_OPTIONS=llvm,mcpu=native,llvm-path=$LLVM_PATH,mattr=sse4.2,mattr=popcnt,mattr=lzcnt,mattr=bmi,mattr=bmi2,mattr=pclmul,mattr=aes
 
-# Build mono netcore
+# Clean up
+rm -rf $TE_PRJ_DIR/bin $TE_PRJ_DIR/obj
+
+# Build mono netcore /p:MonoAOTLLVMUseCxx11Abi=true
 cd $MONO_GIT_ROOT
 export MONO_DEBUG=disable_omit_fp
 case $1 in
@@ -31,10 +36,10 @@ case $1 in
 	./build.sh mono+libs -c Release
 	echo ">>>>>>>> reached jit case";;
     jit-llvm)
-	./build.sh mono+libs -c Release /p:MonoEnableLLVM=true
+	./build.sh mono+libs -c Release /p:MonoEnableLLVM=true /p:MonoAOTEnableLLVM=true
 	echo ">>>>>>>> reached jit-llvm case";;
     aot-llvm)
-	./build.sh mono+libs -c Release /p:MonoEnableLLVM=true
+	./build.sh mono+libs -c Release /p:MonoEnableLLVM=true /p:MonoAOTEnableLLVM=true /p:BuildMonoAotCrossCompiler=true /p:BuildMonoAotCrossCompilerOnly=true 
 	echo ">>>>>>>> reached aot-llvm case";;
 esac
 
@@ -50,13 +55,21 @@ if [[ $1 == *"llvm"* ]]; then
 fi
 
 ./dotnet.sh publish -c release -r linux-x64 $TE_PRJ_DIR/PlatformBenchmarks.csproj
+
+# Use mono runtime
+cp $MONO_GIT_ROOT/artifacts/bin/mono/Linux.x64.Release/System.Private.CoreLib.dll $TE_PRJ_DIR/bin/release/net5.0/linux-x64/
+cp $MONO_GIT_ROOT/artifacts/bin/mono/Linux.x64.Release/libcoreclr.so $TE_PRJ_DIR/bin/release/net5.0/linux-x64/
+
 if [ $1 == "aot-llvm" ]; then
     echo ">>>>>>>>> reached aot-llvm condition"
-    PATH="../llvm/usr/bin/:$(PATH)" \
-	MONO_ENV_OPTIONS="--aot=llvm,mcpu=native"\
-	./dotnet.sh $TE_PRJ_DIR/bin/release/net5.0/linux-x64/PlatformBenchmarks &
+	for assembly in $TE_PRJ_DIR/bin/release/net5.0/linux-x64/*.dll; do \
+		echo "=====" && echo "Starting AOT: $assembly" && echo "=====" && \
+		MONO_ENV_OPTIONS=--aot="$AOT_OPTIONS" \
+		MONO_PATH=$LLVM_PATH \
+		$LLVM_PATH/cross/linux-x64/mono-aot-cross $assembly
+	done
 fi
-./dotnet.sh $TE_PRJ_DIR/bin/release/net5.0/linux-x64/PlatformBenchmarks &
+$TE_PRJ_DIR/bin/release/net5.0/linux-x64/PlatformBenchmarks &
 
 # Wait for the server to start accepting requests
 while ! echo exit | nc localhost 8080; do sleep 10; done
@@ -65,7 +78,7 @@ while ! echo exit | nc localhost 8080; do sleep 10; done
 wrk --latency -t 8 -d 15 -c 256 --header "Accept: text/plain,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,*/*;q=0.7" --header "Connection: keep-alive" http://localhost:8080/plaintext
 
 # Get dotnet PID number
-pid="$(ps aux | grep -i "dotnet" | grep -v grep | awk '{split($0,a," ");print a[2]}')"
+pid="$(ps aux | grep -i "PlatformBenchmarks" | grep -v grep | awk '{split($0,a," ");print a[2]}')"
 echo ">>>>>>>>>>>>>>>MONO_ENV_OPTIONS is ${MONO_ENV_OPTIONS}"
 echo ">>>>>>>>>>>>>>>PID is ${pid}"
 
