@@ -37,8 +37,8 @@ patch_mono()
     mkdir $RuntimeRepoRootDir/.dotnet-mono
 
     # install dotnet sdk
-    $DotnetSdkInstallationScriptDir/dotnet-install.sh -Architecture arm64 -InstallDir $RuntimeRepoRootDir/.dotnet-mono -NoPath -Version $SdkVerNum
-    # $DotnetSdkInstallationScriptDir/dotnet-install.sh -Architecture arm64 -InstallDir $RuntimeRepoRootDir/.dotnet-mono -NoPath -Version $RuntimeVerNum -Runtime dotnet
+    $DotnetSdkInstallationScriptDir/dotnet-install.sh -Architecture $ARCH -InstallDir $RuntimeRepoRootDir/.dotnet-mono -NoPath -Version $SdkVerNum
+    # $DotnetSdkInstallationScriptDir/dotnet-install.sh -Architecture $ARCH -InstallDir $RuntimeRepoRootDir/.dotnet-mono -NoPath -Version $RuntimeVerNum -Runtime dotnet
     # cp -r $RuntimeRepoRootDir/.dotnet/* $RuntimeRepoRootDir/.dotnet-mono
 
     ./build.sh -subset libs.pretest -configuration $CONFIG -ci -arch $ARCH -testscope innerloop /p:RuntimeArtifactsPath=$RuntimeRepoRootDir/artifacts/bin/mono/$OS.$ARCH.$CONFIG /p:RuntimeFlavor=mono
