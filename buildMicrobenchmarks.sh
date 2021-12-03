@@ -59,7 +59,7 @@ build_microbenchmarks()
 run_microbenchmarks()
 {
     cd $MicrobenchmarksRepoRootDir/src/benchmarks/micro
-    $MYDOTNET run -c Release -f net$RELEASE_SDK.0  MicroBenchmarks.csproj --filter System.Tests.Perf_Guid.EqualsSame --corerun $RuntimeRepoRootDir/.dotnet-mono/shared/Microsoft.NETCore.App/$RELEASE_NUM.0.0/corerun
+    $MYDOTNET run -c Release -f net$RELEASE_NUM.0  MicroBenchmarks.csproj --filter System.Tests.Perf_Guid.EqualsSame --corerun $RuntimeRepoRootDir/.dotnet-mono/shared/Microsoft.NETCore.App/$RELEASE_NUM.0.0/corerun --cli $RuntimeRepoRootDir/.dotnet-mono/dotnet
 }
 
 main_fcn()
