@@ -13,9 +13,7 @@ export CONFIG=Release
 export ARCH=arm64
 export OS=Linux
 export MYDOTNET=$RuntimeRepoRootDir/.dotnet-mono/dotnet
-export RELEASE_SDK=6
 export SdkVerNum=7.0.100-alpha.1.21558.2
-export RuntimeVerNum=6.0.0-rc.2.21452.2
 
 export OriginDir=$PWD
 
@@ -38,7 +36,6 @@ patch_mono()
 
     # install dotnet sdk
     $DotnetSdkInstallationScriptDir/dotnet-install.sh -Architecture $ARCH -InstallDir $RuntimeRepoRootDir/.dotnet-mono -NoPath -Version $SdkVerNum
-    # $DotnetSdkInstallationScriptDir/dotnet-install.sh -Architecture $ARCH -InstallDir $RuntimeRepoRootDir/.dotnet-mono -NoPath -Version $RuntimeVerNum -Runtime dotnet
     # cp -r $RuntimeRepoRootDir/.dotnet/* $RuntimeRepoRootDir/.dotnet-mono
 
     ./build.sh -subset libs.pretest -configuration $CONFIG -ci -arch $ARCH -testscope innerloop /p:RuntimeArtifactsPath=$RuntimeRepoRootDir/artifacts/bin/mono/$OS.$ARCH.$CONFIG /p:RuntimeFlavor=mono
@@ -50,7 +47,7 @@ patch_mono()
 
 build_microbenchmarks()
 {
-    echo "Warning: In order to build microbenchmarks successfully, you need to add \";netcoreapp$RELEASE_SDK.0\" to TargetFramework and change TargetFramework to TargetFrameworks in file src/harness/BenchmarkDotNet.Extensions/BenchmarkDotNet.Extensions.csproj"
+    echo "Warning: In order to build microbenchmarks successfully, you need to add \";netcoreapp$RELEASE_NUM.0\" to TargetFramework and change TargetFramework to TargetFrameworks in file src/harness/BenchmarkDotNet.Extensions/BenchmarkDotNet.Extensions.csproj"
     cd $MicrobenchmarksRepoRootDir/src/harness/BenchmarkDotNet.Extensions
     $MYDOTNET build -c Release
     cd $OriginDir
