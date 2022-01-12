@@ -18,9 +18,9 @@ export SdkVerNum=7.0.100-alpha.1.21558.2
 export RuntimeRepoRootDir_CLR=/home/yangfan/work/dotnet_3/runtime
 export MYDOTNET_CLR=$RuntimeRepoRootDir_CLR/.dotnet-new/dotnet
 
-export Benchmark_to_run=System.Tests.Perf_Char.Char_IsUpper
+export Benchmark_to_run=System.Tests.Perf_Guid.EqualsSame
 
-export Benchmark_fcn=Char_IsUpper
+export Benchmark_fcn=EqualsSame
 
 export AOT_repo_root=/home/yangfan/work/runtime
 
@@ -28,15 +28,24 @@ export OriginDir=$PWD
 
 export __ForPerf=0
 
-build_repo()
+build_mono()
 {
     cd $RuntimeRepoRootDir
     git clean -xdff
     if [ $__ForPerf -eq 1 ]; then
         export MONO_DEBUG=disable_omit_fp
     fi
-    ./build.sh mono+libs+clr -c $CONFIG /p:MonoEnableLlvm=true /p:MonoLLVMUseCxx11Abi=true
+    ./build.sh mono+libs -c $CONFIG /p:MonoEnableLlvm=true /p:MonoLLVMUseCxx11Abi=true
     src/tests/build.sh generatelayoutonly $CONFIG
+    cd $OriginDir
+}
+
+build_clr()
+{
+    cd $RuntimeRepoRootDir_CLR
+    git clean -xdff
+    ./build.sh clr+libs -rc checked -lc release
+    src/tests/build.sh generatelayoutonly checked arm64 -cross /p:LibrariesConfiguration=Release
     cd $OriginDir
 }
 
@@ -83,9 +92,11 @@ run_microbenchmarks()
         PerfCommand="perf record -F 999 -g"
         rm perf.data perf-jit.data perf-data.txt
     fi
-    # $PerfCommand $MYDOTNET run -c Release -f net$RELEASE_NUM.0  MicroBenchmarks.csproj --filter $Benchmark_to_run --keepfiles --corerun $RuntimeRepoRootDir/.dotnet-mono/shared/Microsoft.NETCore.App/$RELEASE_NUM.0.0/corerun --cli $MYDOTNET --runtimes monoaotllvm --aotcompilerpath $RuntimeRepoRootDir/artifacts/obj/mono/Linux.arm64.Release/out/bin/mono-sgen --customruntimepack $RuntimeRepoRootDir/artifacts/bin/microsoft.netcore.app.runtime.linux-arm64/Release --aotcompilermode llvm
+    # Run microbenchmarks with mono JIT
+    # $PerfCommand $MYDOTNET run -c Release -f net$RELEASE_NUM.0  MicroBenchmarks.csproj --filter $Benchmark_to_run --keepfiles --corerun $RuntimeRepoRootDir/.dotnet-mono/shared/Microsoft.NETCore.App/$RELEASE_NUM.0.0/corerun --cli $MYDOTNET
+    # Run microbenchmarks with mono LLVM AOT
     export PATH=$RuntimeRepoRootDir/.dotnet-mono:$PATH
-    dotnet run -c Release -f net$RELEASE_NUM.0  MicroBenchmarks.csproj --filter $Benchmark_to_run --keepfiles --runtimes monoaotllvm --aotcompilerpath $RuntimeRepoRootDir/artifacts/obj/mono/Linux.arm64.Release/out/bin/mono-sgen --customruntimepack $RuntimeRepoRootDir/artifacts/bin/microsoft.netcore.app.runtime.linux-arm64/Release
+    MONO_VERBOSE_METHOD=$Benchmark_fcn dotnet run -c Release -f net$RELEASE_NUM.0  MicroBenchmarks.csproj --filter $Benchmark_to_run --keepfiles --runtimes monoaotllvm --aotcompilerpath $RuntimeRepoRootDir/artifacts/obj/mono/Linux.arm64.Release/out/bin/mono-sgen --customruntimepack $RuntimeRepoRootDir/artifacts/bin/microsoft.netcore.app.runtime.linux-arm64/Release --aotcompilermode llvm
     cd $OriginDir
 
     
@@ -133,8 +144,8 @@ post_process_perf_data()
 main_fcn()
 {
     case "$1" in
-        build_repo)
-            build_repo
+        build_mono)
+            build_mono
             ;;
 
         patch_mono)
@@ -171,7 +182,7 @@ main_fcn()
             ;;
 
         build_all)
-            build_repo
+            build_mono
             patch_mono
             build_microbenchmarks
             ;;
@@ -181,18 +192,25 @@ main_fcn()
             ;;
 
         all)
-            build_repo
+            build_mono
             patch_mono
             build_microbenchmarks
             run_microbenchmarks
             ;;
+        
+        all_clr)
+            build_clr
+            get_sdk_new_clr
+            run_microbenchmarks
+            ;;
+
     esac
 }
 
 # Entrypoint of this script
 if [ $# -lt 1 ]; then
     echo "Need to provide one of these strings as an argument
-            * build_repo
+            * build_mono
             * patch_mono
             * build_microbenchmarks
             * run_microbenchmarks
