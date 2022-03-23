@@ -4,7 +4,7 @@
 # * https://github.com/dotnet/runtime
 # * https://github.com/dotnet/performance
 
-export RuntimeRepoRootDir=/home/yangfan/work/dotnet_4/runtime
+export RuntimeRepoRootDir=/home/yangfan/work/dotnet_runtime/runtime
 export MicrobenchmarksRepoRootDir=/home/yangfan/work/performance
 export DotnetSdkInstallationScriptDir=/home/yangfan/work
 
@@ -18,7 +18,7 @@ export SdkVerNum=7.0.100-alpha.1.21558.2
 export RuntimeRepoRootDir_CLR=/home/yangfan/work/dotnet_3/runtime
 export MYDOTNET_CLR=$RuntimeRepoRootDir_CLR/.dotnet-new/dotnet
 
-export Benchmark_to_run=System.Tests.Perf_Guid.EqualsSame
+export Benchmark_to_run="System.Numerics.Tests.Perf_VectorOf<Byte>*"
 
 export Benchmark_fcn=EqualsSame
 
@@ -35,7 +35,7 @@ build_mono()
     if [ $__ForPerf -eq 1 ]; then
         export MONO_DEBUG=disable_omit_fp
     fi
-    ./build.sh mono+libs -c $CONFIG /p:MonoEnableLlvm=true /p:MonoLLVMUseCxx11Abi=true
+    ./build.sh mono+libs+clr.hosts -c $CONFIG /p:MonoEnableLlvm=true /p:MonoLLVMUseCxx11Abi=true
     src/tests/build.sh generatelayoutonly $CONFIG
     cd $OriginDir
 }
@@ -61,10 +61,10 @@ patch_mono()
     # install dotnet sdk
     $DotnetSdkInstallationScriptDir/dotnet-install.sh -Architecture $ARCH -InstallDir $RuntimeRepoRootDir/.dotnet-mono -NoPath -Version $SdkVerNum
 
-    # ./build.sh -subset libs.pretest -configuration $CONFIG -ci -arch $ARCH -testscope innerloop /p:RuntimeArtifactsPath=$RuntimeRepoRootDir/artifacts/bin/mono/$OS.$ARCH.$CONFIG /p:RuntimeFlavor=mono
-    # cp -rf $RuntimeRepoRootDir/artifacts/bin/runtime/net$RELEASE_NUM.0-$OS-$CONFIG-$ARCH/* $RuntimeRepoRootDir/artifacts/bin/testhost/net$RELEASE_NUM.0-$OS-$CONFIG-$ARCH/shared/Microsoft.NETCore.App/$RELEASE_NUM.0.0
-    # cp -r $RuntimeRepoRootDir/artifacts/bin/testhost/net$RELEASE_NUM.0-$OS-$CONFIG-$ARCH/* $RuntimeRepoRootDir/.dotnet-mono
-    # cp $RuntimeRepoRootDir/artifacts/bin/coreclr/$OS.$ARCH.$CONFIG/corerun $RuntimeRepoRootDir/.dotnet-mono/shared/Microsoft.NETCore.App/$RELEASE_NUM.0.0/corerun
+    ./build.sh -subset libs.pretest -configuration $CONFIG -ci -arch $ARCH -testscope innerloop /p:RuntimeArtifactsPath=$RuntimeRepoRootDir/artifacts/bin/mono/$OS.$ARCH.$CONFIG /p:RuntimeFlavor=mono
+    cp -rf $RuntimeRepoRootDir/artifacts/bin/runtime/net$RELEASE_NUM.0-$OS-$CONFIG-$ARCH/* $RuntimeRepoRootDir/artifacts/bin/testhost/net$RELEASE_NUM.0-$OS-$CONFIG-$ARCH/shared/Microsoft.NETCore.App/$RELEASE_NUM.0.0
+    cp -r $RuntimeRepoRootDir/artifacts/bin/testhost/net$RELEASE_NUM.0-$OS-$CONFIG-$ARCH/* $RuntimeRepoRootDir/.dotnet-mono
+    cp $RuntimeRepoRootDir/artifacts/bin/coreclr/$OS.$ARCH.$CONFIG/corerun $RuntimeRepoRootDir/.dotnet-mono/shared/Microsoft.NETCore.App/$RELEASE_NUM.0.0/corerun
     cd $OriginDir
 }
 
@@ -85,7 +85,7 @@ build_microbenchmarks()
 run_microbenchmarks()
 {
     cd $MicrobenchmarksRepoRootDir/src/benchmarks/micro
-    export MONO_ENV_OPTIONS="--llvm"
+    # export MONO_ENV_OPTIONS="--llvm"
     export PerfCommand=""
     if [ $__ForPerf -eq 1 ]; then
         export MONO_ENV_OPTIONS="--jitdump --jitmap --llvm"
@@ -98,8 +98,6 @@ run_microbenchmarks()
     export PATH=$RuntimeRepoRootDir/.dotnet-mono:$PATH
     MONO_VERBOSE_METHOD=$Benchmark_fcn dotnet run -c Release -f net$RELEASE_NUM.0  MicroBenchmarks.csproj --filter $Benchmark_to_run --keepfiles --runtimes monoaotllvm --aotcompilerpath $RuntimeRepoRootDir/artifacts/obj/mono/Linux.arm64.Release/out/bin/mono-sgen --customruntimepack $RuntimeRepoRootDir/artifacts/bin/microsoft.netcore.app.runtime.linux-arm64/Release --aotcompilermode llvm
     cd $OriginDir
-
-    
 }
 
 run_microbenchmarks_clr()
