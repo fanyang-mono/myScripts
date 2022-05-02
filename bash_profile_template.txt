@@ -1,15 +1,5 @@
 # Rename this file to .bash_profile and put it under the home directory
 # This script only works for bash shell
 
-# Before running this script, you need to do `brew install bash-completion`
-
-#!/bin/bash
-
-source /usr/local/etc/bash_completion.d/git-completion.bash 
-source /usr/local/etc/bash_completion.d/git-prompt.sh 
-export PS1='\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[34;1m\]\w\[\033[33m\]$(__git_ps1 " (%s)")\[\033[00m\]$ '
-export CLICOLOR=1
-export LSCOLORS=ExFxBxDxCxegedabagacad
-alias ls='ls -GFh'
-alias emacsgui='/Applications/Emacs.app/Contents/MacOS/Emacs'
-alias python=/usr/local/bin/python3
+source ~/.bash_prompt
+source ~/.aliases 

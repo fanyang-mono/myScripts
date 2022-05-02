@@ -1,0 +1,21 @@
+alias ls='ls -GFh'
+alias ll="ls -al"
+alias ldir="ls -al | grep ^d" # List all directories in current directory in long list format
+alias o="open ." # Open the current directory in Finder
+
+alias emacsgui='/Applications/Emacs.app/Contents/MacOS/Emacs'
+alias python=/usr/local/bin/python3
+
+# GIT
+alias g="git"
+alias gs="git status"
+alias gd="git diff"
+alias gb="git branch"
+alias gp="git pull"
+alias gm="git checkout main"
+alias gf="git fetch upstream"
+alias gr="git rebase upstream/main"
+alias gpm="git push origin main"
+
+# COMMON DIRECTORIES
+alias work="cd ~/Documents/work"
