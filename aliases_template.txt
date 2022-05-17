@@ -12,6 +12,7 @@ alias gs="git status"
 alias gd="git diff"
 alias gb="git branch"
 alias gp="git pull"
+alias gc="git clean -xdff"
 alias gm="git checkout main"
 alias gf="git fetch upstream"
 alias gr="git rebase upstream/main"
@@ -19,3 +20,7 @@ alias gpm="git push origin main"
 
 # COMMON DIRECTORIES
 alias work="cd ~/Documents/work"
+
+# COMMON WORK COMMANDS
+alias mm="make clean && make run"
+alias hw="cd src/mono/sample/HelloWorld"
