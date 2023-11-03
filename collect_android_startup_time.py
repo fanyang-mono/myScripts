@@ -80,7 +80,7 @@ def getParams():
         if cnt != iterations:
             print("Found incorrect number of time recodes: " + str(cnt))
         else:
-            print("Mean of startup time is % s " % (statistics.mean(startup_times)))
+            print("Mean of startup time is % s ms" % (statistics.mean(startup_times)))
             print("Standard Deviation of startup time is % s " % (statistics.stdev(startup_times)))
 
 
