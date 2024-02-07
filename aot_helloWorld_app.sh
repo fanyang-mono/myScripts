@@ -4,7 +4,7 @@
 REPO_ROOT=../../../..
 LLVM_PATH=$REPO_ROOT/artifacts/obj/mono/osx.arm64.Debug/llvm/arm64/bin
 MONO_SGEN=$REPO_ROOT/artifacts/obj/mono/osx.arm64.Debug/mono/mini/mono-sgen
-export MONO_PATH=$REPO_ROOT/artifacts/bin/HelloWorld/arm64/Release/osx-arm64/publish
+export MONO_PATH=$REPO_ROOT/artifacts/bin/HelloWorld/arm64/Debug/osx-arm64/publish
 
 if [ "$1" != "build" ] && [ "$1" != "build-all" ] && [ "$1" != "run" ] && [ "$1" != "llvm-dis" ]; then
     echo "Pass 'build', 'build-all' or 'run' as the first parameter"
