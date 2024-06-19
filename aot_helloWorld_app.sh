@@ -8,9 +8,9 @@ export MONO_PATH=$REPO_ROOT/artifacts/bin/HelloWorld/arm64/Debug/osx-arm64/publi
 
 if [ "$1" != "build" ] && [ "$1" != "build-all" ] && [ "$1" != "run" ] && [ "$1" != "llvm-dis" ]; then
     echo "Pass 'build', 'build-all' or 'run' as the first parameter"
-    echo "If 'build' - pass the name of the assembly as second", pass 'save-temps' as third argument to save llvm template files
+    echo "If 'build' - pass the name of the assembly as second, pass 'save-temps' as third argument to save llvm template files"
     echo "If 'run' - pass 'log' as third for verbose logging"
-    echo "If 'llvm-dis' - pass the llvm template file saved from build as second argument
+    echo "If 'llvm-dis' - pass the llvm template file saved from build as second argument"
     exit 1
 fi
 
