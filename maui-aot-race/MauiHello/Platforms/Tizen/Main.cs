@@ -2,7 +2,7 @@ using System;
 using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 
-namespace maui_aot_race;
+namespace MauiHello;
 
 class Program : MauiApplication
 {

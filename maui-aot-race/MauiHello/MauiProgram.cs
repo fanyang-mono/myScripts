@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace maui_aot_race;
+namespace MauiHello;
 
 public static class MauiProgram
 {

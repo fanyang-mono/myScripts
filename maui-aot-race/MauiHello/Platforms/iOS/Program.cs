@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace maui_aot_race;
+namespace MauiHello;
 
 public class Program
 {

@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace maui_aot_race;
+namespace MauiHello;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

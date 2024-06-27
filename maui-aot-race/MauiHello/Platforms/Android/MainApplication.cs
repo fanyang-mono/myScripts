@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace maui_aot_race;
+namespace MauiHello;
 
 [Application]
 public class MainApplication : MauiApplication

@@ -1,4 +1,4 @@
-﻿namespace maui_aot_race;
+﻿namespace MauiHello;
 
 public partial class AppShell : Shell
 {
